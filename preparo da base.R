@@ -3,8 +3,8 @@ library(dplyr)
 library(stringr)
 library(tools)
 
-# Define o caminho onde os arquivos CSV estão localizados
-caminho <- "previsão dengue/2019/2019/"
+# Define o caminho onde os arquivos CSV do INMET estão localizados
+caminho <- "previsão dengue/2018/2018/"
 
 # Lista os arquivos que contêm "INMET_SE_MG" e terminam com .csv (ignorando maiúsculas/minúsculas)
 arquivos <- list.files(
@@ -30,12 +30,14 @@ dados <- bind_rows(lapply(arquivos, function(arquivo) {
 # Salva os dados consolidados
 write.csv2(dados, "previsão dengue/mg_2019.csv")
 
-# Carrega os dados históricos
+###### Repita esse processo para cada ano de interesse
+
+# Carrega os dados históricos previamente consolidados
 mg16 <- read.csv2("previsão dengue/mg_2016.csv")
 mg17 <- read.csv2("previsão dengue/mg_2017.csv")
 mg18 <- read.csv2("previsão dengue/mg_2018.csv")
 
-# Combina os anos anteriores
+# Combina os anos 
 mg_16a18 <- bind_rows(mg16, mg17, mg18) %>% 
   rename(Data = DATA..YYYY.MM.DD., Hora.UTC = HORA..UTC.)
 
@@ -47,10 +49,7 @@ mg_16a18 <- mg_16a18 %>%
   mutate(across(where(is.double), ~na_if(., -Inf))) %>% 
   mutate(across(where(is.double), ~na_if(., Inf)))
 
-# Garante que a coluna 'codigo' existe antes da agregação
-if (!"codigo" %in% names(mg_16a18)) {
-  stop("A coluna 'codigo' não foi encontrada nos dados históricos.")
-}
+
 
 # Agregação dos dados por código de estação e data
 mg_total_group <- mg_16a18 %>% 
@@ -87,7 +86,7 @@ mg_total_final <- left_join(mg_total_group, Catalogo, by = "codigo") %>%
   mutate(across(where(is.double), ~na_if(., -Inf))) %>%
   mutate(across(where(is.double), ~na_if(., Inf)))
 
-
+# Conferindo o banco de dados criado
 summary(mg_total_final)
 
 head(mg_total_final)
