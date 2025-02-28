@@ -53,7 +53,7 @@ mg_16a18 <- mg_16a18 %>%
 
 # Agregação dos dados por código de estação e data
 mg_total_group <- mg_16a18 %>% 
-  group_by(codigo, Data) %>% 
+  group_by(codigo, cidade, Data) %>% 
   summarise(
     preciptacao = sum(PRECIPITAÇÃO.TOTAL..HORÁRIO..mm., na.rm = TRUE),
     pressao_atmosferica_media = mean(PRESSAO.ATMOSFERICA.AO.NIVEL.DA.ESTACAO..HORARIA..mB., na.rm = TRUE),
@@ -69,7 +69,8 @@ mg_total_group <- mg_16a18 %>%
 
 # Carrega e filtra catálogo de estações meteorológicas
 CatalogoEstaçõesAutomáticas <- read_delim("previsão dengue/CatalogoEstaçõesAutomáticas.csv", 
-                                          delim = ";", escape_double = FALSE, locale = locale(decimal_mark = ","), 
+                                          delim = ";", escape_double = FALSE, 
+                                          locale = locale(decimal_mark = ","), 
                                           trim_ws = TRUE)
 
 Catalogo <- CatalogoEstaçõesAutomáticas %>% 
